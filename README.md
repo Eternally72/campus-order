@@ -186,8 +186,6 @@ mvn -DskipTests compile
 mvn -DskipTests package
 ```
 
-当前项目已适配 JDK 21，并通过 Maven 多模块编译与打包验证。
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
