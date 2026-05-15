@@ -1,157 +1,199 @@
-# 校园二手交易平台项目框架
+# 校园交易服务 Campus Order
 
-## 项目概述
-本项目是一个基于 Spring Cloud Alibaba 的校园二手物品交易平台微服务系统，采用高内聚、低耦合的架构设计。
+面向校园场景的二手交易微服务平台，覆盖用户认证、商品发布与检索、订单交易、消息通知、权限校验和 AI 辅助能力。项目基于 Spring Boot 与 Spring Cloud Alibaba 构建，围绕服务拆分、网关统一入口、服务注册发现、接口限流、缓存优化、消息异步化和分布式事务一致性进行设计。
 
 ## 技术栈
-- **核心框架**: Spring Boot 3.5.x + Spring Cloud 2025.x + Spring Cloud Alibaba 2025.x
-- **服务注册与发现**: Nacos
-- **网关**: Spring Cloud Gateway + Sentinel
-- **远程调用**: OpenFeign + LoadBalancer
-- **分布式事务**: Seata AT模式
-- **认证鉴权**: Sa-Token
-- **消息队列**: RabbitMQ
-- **数据库**: MySQL + MyBatis + PageHelper
-- **缓存**: Redis
-- **AI框架**: LangChain4j
 
-## 项目统计
-- Java文件: 82个
-- XML配置文件: 22个（包含pom.xml和Mapper.xml）
+| 类别 | 技术 |
+| --- | --- |
+| 基础框架 | Spring Boot 3.5.14, Spring Cloud 2025.0.0, Spring Cloud Alibaba 2025.0.0.0 |
+| 服务治理 | Nacos Discovery, Nacos Config, Spring Cloud LoadBalancer |
+| 网关与限流 | Spring Cloud Gateway, Sentinel Gateway |
+| 服务调用 | OpenFeign |
+| 认证鉴权 | Sa-Token, Sa-Token Redis |
+| 数据访问 | MySQL, MyBatis, PageHelper |
+| 缓存 | Redis |
+| 消息队列 | RabbitMQ |
+| 分布式事务 | Seata AT |
+| AI 能力 | LangChain4j, Zhipu AI, MCP, Milvus |
+| 构建工具 | JDK 21, Maven 3.9.15 |
 
-## 模块说明
+## 项目结构
 
-### 1. gateway (端口: 8080)
-- 统一入口网关
-- 集成 Sentinel 流量控制和熔断降级
-- Sa-Token 全局认证过滤器
-- 路由转发配置
-- 限流异常处理
+```text
+campus-order
+├── gateway   # 统一网关，路由转发、登录校验、Sentinel 限流
+├── auth      # 认证服务，登录、注册、Token 管理、权限角色接口
+├── user      # 用户服务，用户资料、密码校验、收藏管理
+├── goods     # 商品服务，商品发布、分类、上下架、库存与收藏计数
+├── order     # 订单服务，创建、取消、支付、发货、确认收货
+├── notify    # 通知服务，消费订单消息并维护通知记录
+├── ai        # AI 服务，对话、流式响应、RAG/MCP 能力集成
+├── common    # 公共 DTO、VO、实体、统一响应、异常、工具和 Feign 契约
+└── document  # 数据库脚本与事务脚本
+```
 
-### 2. auth (端口: 8081)
-- 用户登录/注册
-- Sa-Token 认证鉴权
-- 权限校验接口（StpInterfaceImpl）
-- Feign调用用户服务
+## 服务端口
 
-### 3. user (端口: 8082)
-- 用户信息管理（CRUD）
-- 用户收藏管理
-- 密码验证接口
-- 提供用户相关 Feign 接口
+| 模块 | 服务名 | 默认端口 | 说明 |
+| --- | --- | --- | --- |
+| gateway | gateway-service | 8080 | API 统一入口 |
+| auth | auth-service | 8081 | 登录、注册、Token |
+| user | user-service | 8082 | 用户与收藏 |
+| goods | goods-service | 8083 | 商品、分类、库存 |
+| order | order-service | 8084 | 订单交易 |
+| notify | notify-service | 8085 | 消息通知 |
+| ai | ai-service | 8086 | AI 能力 |
 
-### 4. goods (端口: 8083)
-- 商品发布/管理
-- 商品分类管理（树形结构）
-- 库存管理（扣减/恢复）- 用于分布式事务
-- 商品搜索（关键词、分类、价格等）
-- 提供商品相关 Feign 接口
+## 核心能力
 
-### 5. order (端口: 8084)
-- 订单创建（@GlobalTransactional分布式事务）
-- 订单取消（恢复库存）
-- 订单支付/发货/确认收货
-- 发送订单消息到 RabbitMQ
-- 买家/卖家订单查询
+- 微服务拆分：按认证、用户、商品、订单、通知、AI、网关和公共契约拆分模块。
+- 统一网关：通过 Gateway 暴露 `/api/**` 路由，集中处理认证透传和 Sentinel 网关限流。
+- 服务注册发现：通过 Nacos 进行服务发现与配置管理。
+- 远程调用：Auth 调用 User 完成登录注册，Order 调用 Goods 完成商品校验与库存扣减，User 调用 Goods 同步收藏计数。
+- 分布式事务：订单创建、取消等跨订单与库存场景通过 Seata AT 保证一致性。
+- 异步通知：Order 通过 RabbitMQ 发布订单事件，Notify 消费事件生成通知记录。
+- 缓存与会话：Redis 支撑 Sa-Token 会话、验证码和公共缓存能力。
+- AI 集成：AI 模块集成 LangChain4j、智谱模型、MCP Web Search 和 Milvus 向量检索能力。
 
-### 6. notify (端口: 8085)
-- RabbitMQ 消息监听
-- 订单通知处理（创建、支付、取消、完成）
-- 死信队列处理
-- 通知记录管理（已读/未读）
+## 网关路由
 
-### 7. ai (端口: 8086)
-- AI 对话（同步/流式）
-- 商品描述智能摘要
-- RAG 检索增强问答
-- TODO: 由用户自行实现 LangChain4j 逻辑
+| 外部路径 | 目标服务 |
+| --- | --- |
+| `/api/auth/**` | auth-service |
+| `/api/user/**` | user-service |
+| `/api/goods/**` | goods-service |
+| `/api/order/**` | order-service |
+| `/api/notify/**` | notify-service |
+| `/api/ai/**` | ai-service |
 
-### 8. common
-- 公共实体类（BaseEntity）
-- 统一响应封装（Result、ResultCodeEnum）
-- 全局异常处理（GlobalExceptionHandler）
-- 工具类（IdUtil、PasswordUtil、RedisUtil）
-- 公共 Feign 接口
-- 公共常量（RabbitMQConstant、CommonConstant）
-- 分页DTO（PageQueryDTO、PageVO）
-- Redis配置
+## 环境要求
 
-## 数据库表
-- t_user: 用户表
-- t_goods: 商品表
-- t_category: 商品分类表
-- t_order: 订单表
-- t_favorite: 用户收藏表
-- t_notify_record: 通知记录表
+- JDK 21
+- Maven 3.9.15+
+- MySQL 8+
+- Redis 6+
+- RabbitMQ 3+
+- Nacos 2+
+- Seata Server 2.x
+- Sentinel Dashboard
+- 可选：Milvus、智谱 AI API Key
 
-## Mapper文件
-- UserMapper.xml
-- FavoriteMapper.xml
-- GoodsMapper.xml
-- CategoryMapper.xml
-- OrderMapper.xml
-- NotifyRecordMapper.xml
+## 快速开始
 
-## TODO 清单
-以下是需要用户自行补充的内容：
+1. 初始化数据库：
 
-### 配置相关
-- [ ] 各模块的数据库连接配置（用户名、密码）
-- [ ] Redis 密码配置
-- [ ] RabbitMQ 连接配置（用户名、密码）
-- [ ] Nacos 命名空间配置
-- [ ] Seata 配置（需要先部署 Seata Server）
-- [ ] Sentinel 控制台地址
+```bash
+mysql -u root -p < document/sql/schema.sql
+mysql -u root -p campus_order < document/sql/undo_log.sql
+```
 
-### 业务相关
-- [ ] 验证码生成与校验
-- [ ] 用户权限数据查询（StpInterfaceImpl中从数据库查询）
-- [ ] 完善 AuthServiceImpl 中的用户验证调用
-- [ ] 商品图片上传（OSS/本地存储）
-- [ ] 订单支付集成（支付宝/微信）
+2. 启动基础设施：
 
-### AI 模块
-- [ ] LangChain4j 模型配置（API Key等）
-- [ ] AI 对话实现
-- [ ] RAG 向量存储配置
-- [ ] Tools 工具开发
-- [ ] MCP 集成
+```text
+MySQL
+Redis
+RabbitMQ
+Nacos
+Seata Server
+Sentinel Dashboard
+```
 
-## 启动顺序
-1. 启动 Nacos Server
-2. 启动 MySQL、Redis、RabbitMQ
-3. 启动 Seata Server（可选）
-4. 启动 gateway (8080)
-5. 启动其他微服务：
-   - auth (8081)
-   - user (8082)
-   - goods (8083)
-   - order (8084)
-   - notify (8085)
-   - ai (8086)
+3. 按需配置环境变量：
 
-## API 路由
-| 路径 | 服务 | 说明 |
-|------|------|------|
-| `/api/auth/**` | auth-service | 认证相关 |
-| `/api/user/**` | user-service | 用户相关 |
-| `/api/goods/**` | goods-service | 商品相关 |
-| `/api/order/**` | order-service | 订单相关 |
-| `/api/notify/**` | notify-service | 通知相关 |
-| `/api/ai/**` | ai-service | AI相关 |
+| 环境变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `NACOS_ADDR` | `localhost:8848` | Nacos 地址 |
+| `MYSQL_HOST` | `localhost` | MySQL 主机 |
+| `MYSQL_PORT` | `3306` | MySQL 端口 |
+| `MYSQL_DATABASE` | `campus_order` | 数据库名 |
+| `MYSQL_USERNAME` | `root` | 数据库用户名 |
+| `MYSQL_PASSWORD` | `123456` | 数据库密码 |
+| `REDIS_HOST` | `localhost` | Redis 主机 |
+| `REDIS_PORT` | `6379` | Redis 端口 |
+| `RABBITMQ_HOST` | `localhost` | RabbitMQ 主机 |
+| `RABBITMQ_PORT` | `5672` | RabbitMQ 端口 |
+| `SENTINEL_DASHBOARD` | `localhost:8858` | Sentinel 控制台 |
+| `ZHIPU_API_KEY` | `your-api-key` | 智谱 AI Key |
 
-## 核心功能流程
+4. 编译项目：
 
-### 订单创建流程（分布式事务）
-1. 用户提交订单 -> Order Service
-2. @GlobalTransactional 开启分布式事务
-3. 调用 Goods Service 扣减库存（Feign）
-4. 创建订单记录
-5. 发送订单消息到 RabbitMQ
-6. 事务提交/回滚
+```bash
+mvn clean package -DskipTests
+```
 
-### 消息通知流程
-1. Order Service 发送消息到 RabbitMQ
-2. Notify Service 监听队列
-3. 处理消息，创建通知记录
-4. 用户查询通知列表
+5. 启动服务：
+
+```bash
+java -jar gateway/target/gateway-1.0-SNAPSHOT.jar
+java -jar auth/target/auth-1.0-SNAPSHOT.jar
+java -jar user/target/user-1.0-SNAPSHOT.jar
+java -jar goods/target/goods-1.0-SNAPSHOT.jar
+java -jar order/target/order-1.0-SNAPSHOT.jar
+java -jar notify/target/notify-1.0-SNAPSHOT.jar
+java -jar ai/target/ai-1.0-SNAPSHOT.jar
+```
+
+## 关键业务流程
+
+### 订单创建
+
+1. 客户端通过网关提交订单请求。
+2. Order Service 开启 Seata 全局事务。
+3. Order Service 通过 Feign 查询 Goods Service 商品详情。
+4. Goods Service 校验商品状态并扣减库存。
+5. Order Service 创建订单记录。
+6. Order Service 发布订单创建消息到 RabbitMQ。
+7. Notify Service 消费消息并生成通知。
+
+### 登录认证
+
+1. Auth Service 生成验证码并写入 Redis。
+2. 用户提交登录信息。
+3. Auth Service 通过 Feign 调用 User Service 校验用户名和密码。
+4. 校验成功后通过 Sa-Token 签发 Token。
+5. Gateway 校验 Token 并向下游服务透传 `X-User-Id`。
+
+### 收藏同步
+
+1. User Service 创建或删除收藏记录。
+2. User Service 通过 Feign 调用 Goods Service。
+3. Goods Service 同步增加或减少商品收藏数。
+
+## 数据库
+
+项目默认使用 `campus_order` 数据库，核心表包括：
+
+- `t_user`：用户表
+- `t_category`：商品分类表
+- `t_goods`：商品表
+- `t_order`：订单表
+- `t_favorite`：收藏表
+- `t_notify_record`：通知记录表
+- `undo_log`：Seata AT 事务回滚日志表
+
+脚本位置：
+
+```text
+document/sql/schema.sql
+document/sql/undo_log.sql
+```
+
+## 构建验证
+
+```bash
+mvn -DskipTests compile
+mvn -DskipTests package
+```
+
+当前项目已适配 JDK 21，并通过 Maven 多模块编译与打包验证。
+
+## 配置与安全
+
+- 本地私密配置建议使用环境变量或 `application-local.yml`。
+- `.gitignore` 已忽略本地配置、密钥、日志、IDE 文件、构建产物和个人 Markdown 笔记。
+- 仓库中不应提交真实数据库密码、Redis 密码、RabbitMQ 密码、Token 密钥或 AI API Key。
+
+## License
+
+本项目用于校园交易服务架构实践与学习演示，具体授权请根据实际使用场景补充。
