@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rabbit.user.mapper.FavoriteMapper">
+
+    <resultMap id="BaseResultMap" type="com.rabbit.common.entity.Favorite">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="goods_id" property="goodsId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, goods_id, create_time, update_time, deleted
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="false">
+        INSERT INTO t_favorite (id, user_id, goods_id, create_time, update_time, deleted)
+        VALUES (#{id}, #{userId}, #{goodsId}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <delete id="deleteByUserIdAndGoodsId">
+        UPDATE t_favorite SET deleted = 1, update_time = NOW()
+        WHERE user_id = #{userId} AND goods_id = #{goodsId} AND deleted = 0
+    </delete>
+
+    <delete id="deleteById">
+        UPDATE t_favorite SET deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </delete>
+
+    <select id="countByUserIdAndGoodsId" resultType="int">
+        SELECT COUNT(*) FROM t_favorite
+        WHERE user_id = #{userId} AND goods_id = #{goodsId} AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_favorite
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM t_favorite
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+</mapper>
+

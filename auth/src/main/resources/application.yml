@@ -1,0 +1,51 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+      config:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        file-extension: yaml
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      # password: your-password
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+# Sa-Token配置
+sa-token:
+  token-name: Authorization
+  # Token有效期（单位：秒），默认30天
+  timeout: 2592000
+  # Token临时有效期（指定时间内无操作则过期），单位：秒，-1代表永不过期
+  active-timeout: -1
+  # 是否允许同一账号并发登录
+  is-concurrent: true
+  # 多人登录同一账号时是否共用一个Token
+  is-share: true
+  # Token风格
+  token-style: uuid
+  # 是否输出日志
+  is-log: false
+  # 是否从header读取Token
+  is-read-header: true
+  # 是否从cookie读取Token
+  is-read-cookie: false
+
+# 日志配置
+logging:
+  level:
+    "[com.rabbit.auth]": debug
+

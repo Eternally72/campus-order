@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rabbit.goods.mapper.GoodsMapper">
+
+    <resultMap id="BaseResultMap" type="com.rabbit.common.entity.Goods">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="price" property="price"/>
+        <result column="original_price" property="originalPrice"/>
+        <result column="images" property="images"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="seller_id" property="sellerId"/>
+        <result column="stock" property="stock"/>
+        <result column="quality" property="quality"/>
+        <result column="trade_type" property="tradeType"/>
+        <result column="trade_location" property="tradeLocation"/>
+        <result column="status" property="status"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, description, price, original_price, images, category_id, seller_id, stock,
+        quality, trade_type, trade_location, status, view_count, favorite_count, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_goods
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_goods
+        WHERE deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+        <if test="sellerId != null">
+            AND seller_id = #{sellerId}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO t_goods (id, title, description, price, original_price, images, category_id, seller_id, stock,
+            quality, trade_type, trade_location, status, view_count, favorite_count, create_time, update_time, deleted)
+        VALUES (#{id}, #{title}, #{description}, #{price}, #{originalPrice}, #{images}, #{categoryId}, #{sellerId}, #{stock},
+            #{quality}, #{tradeType}, #{tradeLocation}, #{status}, #{viewCount}, #{favoriteCount}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <update id="update">
+        UPDATE t_goods
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="quality != null">quality = #{quality},</if>
+            <if test="tradeType != null">trade_type = #{tradeType},</if>
+            <if test="tradeLocation != null">trade_location = #{tradeLocation},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE t_goods SET deleted = 1, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="deductStock">
+        UPDATE t_goods SET stock = stock - #{quantity}, update_time = NOW()
+        WHERE id = #{goodsId} AND stock >= #{quantity} AND deleted = 0
+    </update>
+
+    <update id="restoreStock">
+        UPDATE t_goods SET stock = stock + #{quantity}, update_time = NOW()
+        WHERE id = #{goodsId} AND deleted = 0
+    </update>
+
+    <update id="incrementViewCount">
+        UPDATE t_goods SET view_count = view_count + 1 WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="incrementFavoriteCount">
+        UPDATE t_goods SET favorite_count = favorite_count + 1, update_time = NOW()
+        WHERE id = #{goodsId} AND deleted = 0
+    </update>
+
+    <update id="decrementFavoriteCount">
+        UPDATE t_goods SET favorite_count = GREATEST(favorite_count - 1, 0), update_time = NOW()
+        WHERE id = #{goodsId} AND deleted = 0
+    </update>
+</mapper>
+

@@ -1,0 +1,76 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: ai-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+      config:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        file-extension: yaml
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+# LangChain4j配置
+langchain4j:
+  model:
+    chat:
+      api-key: ${AI_CHAT_API_KEY:your-api-key}
+      base-url: ${AI_CHAT_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      model-name: ${AI_CHAT_MODEL:glm-4}
+      connect-timeout: 30
+      max-tokens: ${AI_CHAT_MAX_TOKENS:2048}
+      temperature: ${AI_CHAT_TEMPERATURE:0.7}
+    picture:
+      api-key: ${AI_IMAGE_API_KEY:your-api-key}
+      base-url: ${AI_IMAGE_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      model-name: ${AI_IMAGE_MODEL:cogview-3}
+      connect-timeout: 30
+      max-tokens: ${AI_IMAGE_MAX_TOKENS:1024}
+      temperature: ${AI_IMAGE_TEMPERATURE:0.7}
+    embedding:
+      api-key: ${AI_EMBEDDING_API_KEY:your-api-key}
+      base-url: ${AI_EMBEDDING_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      model-name: ${AI_EMBEDDING_MODEL:embedding-3}
+      connect-timeout: 30
+      max-tokens: ${AI_EMBEDDING_MAX_TOKENS:1024}
+      temperature: ${AI_EMBEDDING_TEMPERATURE:0.7}
+    streaming:
+      model-name: ${AI_STREAMING_MODEL:glm-4}
+      base-url: ${AI_STREAMING_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      api-key: ${AI_STREAMING_API_KEY:your-api-key}
+      connect-timeout: 30
+      max-tokens: ${AI_STREAMING_MAX_TOKENS:2048}
+      temperature: ${AI_STREAMING_TEMPERATURE:0.7}
+    vision:
+      model-name: ${AI_VISION_MODEL:glm-4v}
+      base-url: ${AI_VISION_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+      api-key: ${AI_VISION_API_KEY:your-api-key}
+      connect-timeout: 30
+      max-tokens: ${AI_VISION_MAX_TOKENS:2048}
+      temperature: ${AI_VISION_TEMPERATURE:0.7}
+
+zhipu:
+  apiKey: ${ZHIPU_API_KEY:${AI_CHAT_API_KEY:your-api-key}}
+  mcp:
+    web-search-url: ${ZHIPU_MCP_WEB_SEARCH_URL:https://open.bigmodel.cn/api/mcp/web_search_prime/mcp}
+
+
+# 日志配置
+logging:
+  level:
+    "[com.rabbit.ai]": debug
+    "[dev.langchain4j]": debug
+

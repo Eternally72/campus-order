@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rabbit.notify.mapper.NotifyRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.rabbit.common.entity.NotifyRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="type" property="type"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="biz_id" property="bizId"/>
+        <result column="biz_type" property="bizType"/>
+        <result column="read_flag" property="readFlag"/>
+        <result column="read_time" property="readTime"/>
+        <result column="send_status" property="sendStatus"/>
+        <result column="send_time" property="sendTime"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, type, title, content, biz_id, biz_type, read_flag, read_time,
+        send_status, send_time, fail_reason, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_notify_record
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM t_notify_record
+        WHERE user_id = #{userId} AND deleted = 0
+        <if test="readFlag != null">
+            AND read_flag = #{readFlag}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="countUnread" resultType="long">
+        SELECT COUNT(*) FROM t_notify_record
+        WHERE user_id = #{userId} AND read_flag = 0 AND deleted = 0
+    </select>
+
+    <insert id="insert">
+        INSERT INTO t_notify_record (id, user_id, type, title, content, biz_id, biz_type,
+            read_flag, read_time, send_status, send_time, fail_reason, create_time, update_time, deleted)
+        VALUES (#{id}, #{userId}, #{type}, #{title}, #{content}, #{bizId}, #{bizType},
+            #{readFlag}, #{readTime}, #{sendStatus}, #{sendTime}, #{failReason}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <update id="update">
+        UPDATE t_notify_record
+        <set>
+            <if test="readFlag != null">read_flag = #{readFlag},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+            <if test="sendStatus != null">send_status = #{sendStatus},</if>
+            <if test="sendTime != null">send_time = #{sendTime},</if>
+            <if test="failReason != null">fail_reason = #{failReason},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE t_notify_record SET deleted = 1, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="markAsRead">
+        UPDATE t_notify_record SET read_flag = 1, read_time = NOW(), update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE t_notify_record SET read_flag = 1, read_time = NOW(), update_time = NOW()
+        WHERE user_id = #{userId} AND read_flag = 0 AND deleted = 0
+    </update>
+</mapper>
+

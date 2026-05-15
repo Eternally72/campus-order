@@ -1,0 +1,106 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+      config:
+        server-addr: ${NACOS_ADDR:localhost:8848}
+        file-extension: yaml
+    gateway:
+      server:
+        webflux:
+          routes:
+            # 用户服务路由
+            - id: user-service
+              uri: lb://user-service
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - StripPrefix=1
+
+            # 商品服务路由
+            - id: goods-service
+              uri: lb://goods-service
+              predicates:
+                - Path=/api/goods/**
+              filters:
+                - StripPrefix=1
+
+            # 订单服务路由
+            - id: order-service
+              uri: lb://order-service
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - StripPrefix=1
+
+            # 认证服务路由
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+
+            # 通知服务路由
+            - id: notify-service
+              uri: lb://notify-service
+              predicates:
+                - Path=/api/notify/**
+              filters:
+                - StripPrefix=1
+
+            # AI服务路由
+            - id: ai-service
+              uri: lb://ai-service
+              predicates:
+                - Path=/api/ai/**
+              filters:
+                - StripPrefix=1
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:localhost:8858}
+        port: ${SENTINEL_PORT:8719}
+      eager: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      # password: your-password
+      database: ${REDIS_DATABASE:0}
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+# Sa-Token配置
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-log: false
+  is-read-header: true
+  is-read-cookie: false
+
+# 日志配置
+logging:
+  level:
+    "[com.rabbit.gateway]": debug
+    "[org.springframework.cloud.gateway]": debug
+

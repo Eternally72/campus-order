@@ -1,0 +1,103 @@
+# Build output
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven wrapper is allowed when present
+!.mvn/wrapper/maven-wrapper.jar
+
+# Local Maven / tooling caches
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties
+.m2/
+
+# Logs and runtime files
+logs/
+*.log
+*.pid
+*.seed
+*.hprof
+hs_err_pid*
+replay_pid*
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+*.env
+*.local
+*.local.*
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+
+# Personal notes / private docs
+*.md
+!README.md
+
+# Spring local override configs
+**/src/main/resources/application-local.yml
+**/src/main/resources/application-local.yaml
+**/src/main/resources/application-local.properties
+**/src/main/resources/bootstrap-local.yml
+**/src/main/resources/bootstrap-local.yaml
+**/src/main/resources/bootstrap-local.properties
+**/src/main/resources/application-dev-local.yml
+**/src/main/resources/application-dev-local.yaml
+**/src/main/resources/application-prod-local.yml
+**/src/main/resources/application-prod-local.yaml
+
+# Personal YAML configs
+*personal*.yml
+*personal*.yaml
+*private*.yml
+*private*.yaml
+*secret*.yml
+*secret*.yaml
+**/application-personal.yml
+**/application-personal.yaml
+**/application-private.yml
+**/application-private.yaml
+**/application-secret.yml
+**/application-secret.yaml
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.apt_generated_tests/
+.springBeans
+.sts4-cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Codex / agent local state
+.agents/
+.codex/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
