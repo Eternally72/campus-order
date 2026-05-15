@@ -188,12 +188,6 @@ mvn -DskipTests package
 
 当前项目已适配 JDK 21，并通过 Maven 多模块编译与打包验证。
 
-## 配置与安全
-
-- 本地私密配置建议使用环境变量或 `application-local.yml`。
-- `.gitignore` 已忽略本地配置、密钥、日志、IDE 文件、构建产物和个人 Markdown 笔记。
-- 仓库中不应提交真实数据库密码、Redis 密码、RabbitMQ 密码、Token 密钥或 AI API Key。
-
 ## License
 
-本项目用于校园交易服务架构实践与学习演示，具体授权请根据实际使用场景补充。
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
